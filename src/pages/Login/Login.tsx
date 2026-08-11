@@ -32,7 +32,7 @@ export default function Login({ onSignIn }: { onSignIn: () => void }) {
           </div>
           <p className="mt-3 text-[13px] tracking-[0.02em] text-ink-faint">
             あなたのすべてを、ひとつの箱に
-            <span className="mt-1 block text-ink-faint">Your life. In one box.</span>
+            <span className="mt-1 block text-ink-faint">Your Everything. In one box.</span>
           </p>
         </div>
 
