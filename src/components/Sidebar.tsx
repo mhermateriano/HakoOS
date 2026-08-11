@@ -34,7 +34,7 @@ export default function Sidebar({ page, setPage, onLogout }: { page: PageKey; se
         <HakoMark size={36} />
         <div className="leading-tight">
           <div className="text-[15px] font-600 tracking-[-0.02em] text-ink">Hako<span className="hako-os font-700">OS</span></div>
-          <div className="text-[11px] text-ink-faint">Your life. In one box.</div>
+          <div className="text-[11px] text-ink-faint">Your Everything. In one box.</div>
         </div>
       </div>
 
