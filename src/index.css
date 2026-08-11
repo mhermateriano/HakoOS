@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', monospace;
+
+  --color-ground: #0b0c12;
+  --color-panel: #151722;
+  --color-panel-2: #1f2231;
+  --color-line: #2e3346;
+  --color-line-soft: #232739;
+  --color-ink: #f5f5f7;
+  --color-ink-dim: #a7a3b4;
+  --color-ink-faint: #6f6c82;
+
+  --color-signal: #8b5cf6;
+  --color-signal-ink: #ffffff;
+  --color-up: #30d158;
+  --color-down: #ff453a;
+  --color-info: #0a84ff;
+  --color-warn: #ff9f0a;
+  --color-violet: #8b5cf6;
+  --color-lavender: #c4b5fd;
+  --color-indigo: #6366f1;
+
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+  }
+  /* Hide scrollbars until scrolling */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  *:hover {
+    scrollbar-color: var(--color-line) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 8px;
+  }
+  *:hover::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+  }
+}
+
+@layer utilities {
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Soft lavender-to-indigo gradient text for the HakoOS "OS" accent */
+  .hako-os {
+    background-image: linear-gradient(135deg, #c4b5fd 0%, #8b5cf6 50%, #6366f1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* macOS-style vibrancy / frosted material */
+  .glass {
+    background-color: color-mix(in srgb, var(--color-panel) 72%, transparent);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+  }
+  .grid-noise {
+    background-image:
+      linear-gradient(var(--color-line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-line-soft) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
