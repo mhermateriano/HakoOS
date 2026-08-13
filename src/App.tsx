@@ -8,8 +8,10 @@ import Notes from './pages/Notes/Notes'
 import Income from './pages/Income/Income'
 import Accounts from './pages/Accounts/Accounts'
 import Login from './pages/Login/Login'
+import Signup from './pages/Signup/Signup'
 import Calendar from './pages/Calendar/Calendar'
 import Tasks from './pages/Tasks/Tasks'
+import { getUser } from './lib/auth'
 
 const meta: Record<PageKey, { title: string; blurb: string }> = {
   dashboard: { title: 'Dashboard', blurb: 'Everything at a glance' },
@@ -39,30 +41,38 @@ function Shell({ onLogout }: { onLogout: () => void }) {
         <Sidebar page={page} setPage={nav} onLogout={onLogout} />
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer overlay */}
       {navOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setNavOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-64"><Sidebar page={page} setPage={nav} onLogout={onLogout} /></div>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setNavOpen(false)} />
+          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw]">
+            <Sidebar page={page} setPage={nav} onLogout={onLogout} />
+          </div>
         </div>
       )}
 
       <div className="lg:pl-60">
-        <header className="glass sticky top-0 z-30 flex items-center gap-3 border-b border-line-soft px-5 py-3.5 sm:px-8">
-          <button className="rounded-full border border-line p-2 text-ink-dim lg:hidden" onClick={() => setNavOpen((v) => !v)}>
+        <header className="glass sticky top-0 z-30 flex items-center gap-3 border-b border-line-soft px-4 py-3 sm:px-6">
+          <button
+            className="rounded-full border border-line p-2 text-ink-dim lg:hidden"
+            onClick={() => setNavOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
             {navOpen ? <X size={16} /> : <Menu size={16} />}
           </button>
-          <div className="flex-1">
-            <h1 className="text-[22px] font-700 leading-tight tracking-[-0.02em] text-ink">{meta[page].title}</h1>
-            <p className="text-[13px] text-ink-faint">{meta[page].blurb}</p>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-[18px] font-700 leading-tight tracking-[-0.02em] text-ink sm:text-[22px]">
+              {meta[page].title}
+            </h1>
+            <p className="hidden text-[12px] text-ink-faint sm:block">{meta[page].blurb}</p>
           </div>
           <div className="hidden text-right sm:block">
-            <div className="text-[13px] font-500 text-ink-dim">{today}</div>
+            <div className="text-[12px] font-500 text-ink-dim">{today}</div>
             <div className="text-[11px] text-ink-faint">Local · offline vault</div>
           </div>
         </header>
 
-        <main className="px-5 py-6 sm:px-8">
+        <main className="px-4 py-5 sm:px-6 sm:py-6">
           {page === 'dashboard' && <Dashboard setPage={nav} />}
           {page === 'passwords' && <Passwords />}
           {page === 'notes' && <Notes />}
@@ -77,23 +87,31 @@ function Shell({ onLogout }: { onLogout: () => void }) {
 }
 
 export default function App() {
+  const [registered, setRegistered] = useState(() => getUser() !== null)
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('hako.authed') === '1')
 
-  const signIn = () => {
+  const handleSignUp = () => {
+    sessionStorage.setItem('hako.authed', '1')
+    setRegistered(true)
+    setAuthed(true)
+  }
+
+  const handleSignIn = () => {
     sessionStorage.setItem('hako.authed', '1')
     setAuthed(true)
   }
 
-  const signOut = () => {
+  const handleSignOut = () => {
     sessionStorage.removeItem('hako.authed')
     setAuthed(false)
   }
 
-  if (!authed) return <Login onSignIn={signIn} />
+  if (!registered) return <Signup onSignUp={handleSignUp} />
+  if (!authed) return <Login onSignIn={handleSignIn} />
 
   return (
     <VaultProvider>
-      <Shell onLogout={signOut} />
+      <Shell onLogout={handleSignOut} />
     </VaultProvider>
   )
 }

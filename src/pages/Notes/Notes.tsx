@@ -53,7 +53,7 @@ function Editor({ note }: { note: Note }) {
           </button>
           <button
             onClick={() => deleteNote(note.id)}
-            className="rounded-md p-2 text-ink-faint transition-colors hover:bg-panel-2 hover:text-down"
+            className="rounded-md p-2 text-ink-faint transition-colors hover:bg-panel-2 hover:text-down active:text-down"
             title="Delete"
           >
             <Trash2 size={15} />
@@ -111,7 +111,7 @@ export default function Notes() {
   }
 
   return (
-    <div className="grid h-[calc(100vh-9.5rem)] grid-cols-1 overflow-hidden rounded-2xl border border-line bg-panel shadow-[0_1px_2px_rgba(0,0,0,0.3),0_8px_24px_-12px_rgba(0,0,0,0.5)] lg:grid-cols-[320px_1fr]">
+    <div className="grid h-[calc(100dvh-7.5rem)] grid-cols-1 overflow-hidden rounded-2xl border border-line bg-panel shadow-[0_1px_2px_rgba(0,0,0,0.3),0_8px_24px_-12px_rgba(0,0,0,0.5)] sm:h-[calc(100dvh-9rem)] lg:grid-cols-[320px_1fr]">
       {/* Master list */}
       <div className={`flex min-h-0 flex-col border-line lg:border-r ${selected ? 'hidden lg:flex' : 'flex'}`}>
         <div className="space-y-3 border-b border-line p-3">

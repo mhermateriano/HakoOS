@@ -24,13 +24,13 @@ function Stat({
   return (
     <button
       onClick={onClick}
-      className="group relative overflow-hidden rounded-lg border border-line bg-panel p-5 text-left transition-all duration-200 hover:border-ink-faint"
+      className="group relative overflow-hidden rounded-lg border border-line bg-panel p-3.5 text-left transition-all duration-200 hover:border-ink-faint sm:p-5"
     >
       <div className="flex items-start justify-between">
         <span className="text-[10px] uppercase tracking-[0.18em] text-ink-faint">{label}</span>
         <Icon size={16} strokeWidth={1.8} style={{ color: accent }} />
       </div>
-      <div className="mt-6 text-[34px] font-600 leading-none tnum text-ink">{value}</div>
+      <div className="mt-4 text-[26px] font-600 leading-none tnum text-ink sm:mt-6 sm:text-[34px]">{value}</div>
       <div className="mt-2 flex items-center gap-1 text-[11px] text-ink-dim">
         {sub}
         <ArrowUpRight size={12} className="opacity-0 transition-opacity group-hover:opacity-100" />

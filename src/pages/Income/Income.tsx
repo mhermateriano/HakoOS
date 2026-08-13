@@ -131,7 +131,7 @@ export default function Income() {
                   </div>
                 </div>
                 <span className="text-[14px] font-600 tnum text-up">+{money2(e.amount)}</span>
-                <button onClick={() => deleteIncome(e.id)} className="rounded-md p-1.5 text-ink-faint opacity-0 transition-all hover:bg-panel-2 hover:text-down group-hover:opacity-100"><Trash2 size={14} /></button>
+                <button onClick={() => deleteIncome(e.id)} className="rounded-md p-1.5 text-ink-faint transition-all hover:bg-panel-2 hover:text-down opacity-100 sm:opacity-0 sm:group-hover:opacity-100"><Trash2 size={14} /></button>
               </div>
             ))}
           </div>
@@ -194,7 +194,7 @@ export default function Income() {
                   </div>
                 </div>
                 <span className="text-[14px] font-600 tnum text-down">−{money2(e.amount)}</span>
-                <button onClick={() => deleteExpense(e.id)} className="rounded-md p-1.5 text-ink-faint opacity-0 transition-all hover:bg-panel-2 hover:text-down group-hover:opacity-100"><Trash2 size={14} /></button>
+                <button onClick={() => deleteExpense(e.id)} className="rounded-md p-1.5 text-ink-faint transition-all hover:bg-panel-2 hover:text-down opacity-100 sm:opacity-0 sm:group-hover:opacity-100"><Trash2 size={14} /></button>
               </div>
             ))}
           </div>

@@ -95,7 +95,7 @@ export default function Tasks() {
                 <Flag size={12} style={{ color: priorityColor[t.priority] }} className="hidden sm:block" />
                 <Tag color={catColor[t.list] ?? '#9591ab'}>{t.list}</Tag>
                 <span className={`w-16 text-right text-[11px] ${late ? 'text-down' : 'text-ink-dim'}`}>{relDays(t.due)}</span>
-                <button onClick={() => deleteTask(t.id)} className="rounded-md p-1.5 text-ink-faint opacity-0 transition-all hover:bg-panel-2 hover:text-down group-hover:opacity-100"><Trash2 size={14} /></button>
+                <button onClick={() => deleteTask(t.id)} className="rounded-md p-1.5 text-ink-faint transition-all hover:bg-panel-2 hover:text-down opacity-100 sm:opacity-0 sm:group-hover:opacity-100"><Trash2 size={14} /></button>
               </div>
             )
           })}

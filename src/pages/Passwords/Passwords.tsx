@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
-import { Eye, EyeOff, Copy, Check, Trash2, Plus, Search, RefreshCw, Globe } from 'lucide-react'
+import { Eye, EyeOff, Copy, Check, Trash2, Plus, Search, RefreshCw, Globe, X } from 'lucide-react'
 import { useVault, type Password } from '../../store/VaultStore'
 import { fmtDate } from '../../lib/format'
 import { catColor } from '../../lib/colors'
-import { logoUrl } from '../../lib/logo'
 import { Panel, SectionHead, Button, Field, Input, Select, Tag, Empty } from '../../components/ui'
 
 const cats: Password['category'][] = ['Personal', 'Work', 'Finance', 'Social', 'Dev']
@@ -31,28 +30,115 @@ function genPassword() {
   return Array.from({ length: 16 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
 
-function LogoAvatar({ url, name, color }: { url: string; name: string; color: string }) {
-  const [failed, setFailed] = useState(false)
-  const src = logoUrl(url)
-
-  if (failed || !src) {
-    return (
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line bg-ground text-[13px] font-600 uppercase" style={{ color }}>
-        {name.slice(0, 1)}
-      </div>
-    )
-  }
+function LogoAvatar({ name, color }: { name: string; color: string }) {
   return (
-    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-ground p-1.5">
-      <img
-        src={src}
-        alt={`${name} logo`}
-        width={22}
-        height={22}
-        loading="lazy"
-        onError={() => setFailed(true)}
-        className="h-full w-full object-contain"
-      />
+    <div
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[14px] font-700 uppercase"
+      style={{ backgroundColor: `color-mix(in srgb, ${color} 16%, transparent)`, color }}
+    >
+      {name.slice(0, 1)}
+    </div>
+  )
+}
+
+function CredentialModal({ p, onClose }: { p: Password; onClose: () => void }) {
+  const [show, setShow] = useState(false)
+  const [copied, setCopied] = useState<'user' | 'pw' | null>(null)
+  const st = strength(p.password)
+
+  const copy = (text: string, field: 'user' | 'pw') => {
+    navigator.clipboard?.writeText(text)
+    setCopied(field)
+    setTimeout(() => setCopied(null), 1500)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative w-full rounded-t-2xl border-t border-line bg-panel px-5 pb-10 pt-5 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Drag handle */}
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-line" />
+
+        {/* Header */}
+        <div className="mb-5 flex items-center gap-3">
+          <LogoAvatar name={p.name} color={catColor[p.category]} />
+          <div className="min-w-0 flex-1">
+            <div className="text-[15px] font-600 text-ink">{p.name}</div>
+            <div className="flex items-center gap-1 text-[11px] text-ink-faint">
+              <Globe size={10} /> {p.url}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 text-ink-faint transition-colors hover:bg-panel-2 hover:text-ink"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Username */}
+        <div className="mb-3 rounded-xl border border-line bg-ground p-3.5">
+          <div className="mb-2 text-[10px] font-600 uppercase tracking-widest text-ink-faint">Username</div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="min-w-0 truncate text-[14px] text-ink">{p.username || '—'}</span>
+            {p.username && (
+              <button
+                onClick={() => copy(p.username, 'user')}
+                className="shrink-0 rounded-lg p-1.5 text-ink-faint transition-colors hover:bg-panel-2 hover:text-signal"
+              >
+                {copied === 'user' ? <Check size={15} className="text-up" /> : <Copy size={15} />}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Password */}
+        <div className="rounded-xl border border-line bg-ground p-3.5">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[10px] font-600 uppercase tracking-widest text-ink-faint">Password</span>
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: st.color }} />
+              <span className="text-[10px] uppercase tracking-wide" style={{ color: st.color }}>{st.label}</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <span className="min-w-0 truncate font-mono text-[14px] text-ink">
+              {show ? p.password : '•'.repeat(Math.min(p.password.length, 14))}
+            </span>
+            <div className="flex shrink-0 items-center gap-0.5">
+              <button
+                onClick={() => setShow((v) => !v)}
+                className="rounded-lg p-1.5 text-ink-faint transition-colors hover:bg-panel-2 hover:text-ink"
+              >
+                {show ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+              <button
+                onClick={() => copy(p.password, 'pw')}
+                className="rounded-lg p-1.5 text-ink-faint transition-colors hover:bg-panel-2 hover:text-signal"
+              >
+                {copied === 'pw' ? <Check size={15} className="text-up" /> : <Copy size={15} />}
+              </button>
+            </div>
+          </div>
+          {/* Strength bar */}
+          <div className="mt-3 flex gap-0.5">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className="h-1 flex-1 rounded-full transition-colors"
+                style={{ backgroundColor: i <= st.score ? st.color : 'var(--color-line)' }}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-3 text-center text-[11px] text-ink-faint">
+          Last updated {fmtDate(p.updated)}
+        </div>
+      </div>
     </div>
   )
 }
@@ -60,6 +146,7 @@ function LogoAvatar({ url, name, color }: { url: string; name: string; color: st
 function Row({ p, onDelete }: { p: Password; onDelete: () => void }) {
   const [show, setShow] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
   const st = strength(p.password)
 
   const copy = () => {
@@ -69,42 +156,77 @@ function Row({ p, onDelete }: { p: Password; onDelete: () => void }) {
   }
 
   return (
-    <div className="group grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-3.5 transition-colors hover:bg-panel-2/50 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1.6fr)_auto]">
-      <div className="flex items-center gap-3">
-        <LogoAvatar url={p.url} name={p.name} color={catColor[p.category]} />
-        <div className="min-w-0">
+    <>
+      {/* ── Desktop row: 3-column grid ── */}
+      <div className="group hidden sm:grid sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1.6fr)_auto] items-center gap-4 px-4 py-3.5 transition-colors hover:bg-panel-2/50">
+        {/* Col 1: identity */}
+        <div className="flex items-center gap-3">
+          <LogoAvatar name={p.name} color={catColor[p.category]} />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="truncate text-[13px] text-ink">{p.name}</span>
+              <Tag color={catColor[p.category]}>{p.category}</Tag>
+            </div>
+            <div className="flex items-center gap-1 text-[10.5px] text-ink-faint">
+              <Globe size={10} /> {p.url}
+            </div>
+          </div>
+        </div>
+        {/* Col 2: credentials */}
+        <div className="min-w-0 flex flex-col gap-1">
+          <div className="truncate text-[12px] text-ink-dim">{p.username}</div>
           <div className="flex items-center gap-2">
-            <span className="truncate text-[13px] text-ink">{p.name}</span>
+            <span className="font-mono text-[12px] tracking-wide text-ink">
+              {show ? p.password : '•'.repeat(10)}
+            </span>
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: st.color }} title={st.label} />
+            <span className="text-[9px] uppercase tracking-wide" style={{ color: st.color }}>{st.label}</span>
+          </div>
+        </div>
+        {/* Col 3: actions */}
+        <div className="flex items-center gap-1">
+          <button onClick={() => setShow((v) => !v)} className="rounded-md p-2 text-ink-faint transition-colors hover:bg-panel-2 hover:text-ink" title="Reveal">
+            {show ? <EyeOff size={15} /> : <Eye size={15} />}
+          </button>
+          <button onClick={copy} className="rounded-md p-2 text-ink-faint transition-colors hover:bg-panel-2 hover:text-signal" title="Copy">
+            {copied ? <Check size={15} className="text-up" /> : <Copy size={15} />}
+          </button>
+          <button onClick={onDelete} className="rounded-md p-2 text-ink-faint opacity-0 transition-all hover:bg-panel-2 hover:text-down group-hover:opacity-100" title="Delete">
+            <Trash2 size={15} />
+          </button>
+          <span className="ml-1 hidden w-14 text-right text-[10px] text-ink-faint md:block">{fmtDate(p.updated)}</span>
+        </div>
+      </div>
+
+      {/* ── Mobile row: compact, eye opens modal ── */}
+      <div className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-panel-2/50 sm:hidden">
+        <LogoAvatar name={p.name} color={catColor[p.category]} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="truncate text-[13px] font-500 text-ink">{p.name}</span>
             <Tag color={catColor[p.category]}>{p.category}</Tag>
           </div>
           <div className="flex items-center gap-1 text-[10.5px] text-ink-faint">
             <Globe size={10} /> {p.url}
           </div>
         </div>
-      </div>
-
-      <div className="hidden min-w-0 flex-col gap-1 sm:flex">
-        <div className="truncate text-[12px] text-ink-dim">{p.username}</div>
-        <div className="flex items-center gap-2">
-          <span className="text-[12px] tracking-wide text-ink">{show ? p.password : '•'.repeat(10)}</span>
-          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: st.color }} title={st.label} />
-          <span className="text-[9px] uppercase tracking-wide" style={{ color: st.color }}>{st.label}</span>
+        <div className="flex shrink-0 items-center gap-0.5">
+          <button
+            onClick={() => setModalOpen(true)}
+            className="rounded-md p-2 text-ink-faint transition-colors hover:bg-panel-2 hover:text-ink"
+            title="View credentials"
+          >
+            <Eye size={15} />
+          </button>
+          <button onClick={onDelete} className="rounded-md p-2 text-ink-faint transition-colors hover:bg-panel-2 hover:text-down" title="Delete">
+            <Trash2 size={15} />
+          </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
-        <button onClick={() => setShow((v) => !v)} className="rounded-md p-2 text-ink-faint transition-colors hover:bg-panel-2 hover:text-ink" title="Reveal">
-          {show ? <EyeOff size={15} /> : <Eye size={15} />}
-        </button>
-        <button onClick={copy} className="rounded-md p-2 text-ink-faint transition-colors hover:bg-panel-2 hover:text-signal" title="Copy">
-          {copied ? <Check size={15} className="text-up" /> : <Copy size={15} />}
-        </button>
-        <button onClick={onDelete} className="rounded-md p-2 text-ink-faint opacity-0 transition-all hover:bg-panel-2 hover:text-down group-hover:opacity-100" title="Delete">
-          <Trash2 size={15} />
-        </button>
-        <span className="ml-1 hidden w-14 text-right text-[10px] text-ink-faint md:block">{fmtDate(p.updated)}</span>
-      </div>
-    </div>
+      {/* ── Mobile credential modal ── */}
+      {modalOpen && <CredentialModal p={p} onClose={() => setModalOpen(false)} />}
+    </>
   )
 }
 
@@ -139,15 +261,13 @@ export default function Passwords() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative min-w-0 flex-1">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
           <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search vault…" className="pl-9" />
         </div>
-        <Select value={filter} onChange={(e) => setFilter(e.target.value)} className="w-40">
+        <Select value={filter} onChange={(e) => setFilter(e.target.value)} className="w-36">
           <option>All</option>
-          {cats.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
+          {cats.map((c) => <option key={c}>{c}</option>)}
         </Select>
         <Button variant="signal" onClick={() => setOpen((v) => !v)}>
           <Plus size={14} /> New
@@ -181,15 +301,27 @@ export default function Passwords() {
       )}
 
       <div className="grid grid-cols-3 gap-3">
-        <Panel className="p-4"><div className="text-[12px] font-500 text-ink-dim">Total</div><div className="mt-2 text-[24px] font-600 tnum text-ink">{passwords.length}</div></Panel>
-        <Panel className="p-4"><div className="text-[12px] font-500 text-ink-dim">Avg strength</div><div className="mt-2 text-[24px] font-600 tnum" style={{ color: avgStrength > 70 ? '#4fd9a4' : avgStrength > 45 ? '#e0a850' : '#ff5c72' }}>{avgStrength}%</div></Panel>
-        <Panel className="p-4"><div className="text-[12px] font-500 text-ink-dim">Weak</div><div className="mt-2 text-[24px] font-600 tnum text-down">{passwords.filter((p) => strength(p.password).score < 3).length}</div></Panel>
+        <Panel className="p-4">
+          <div className="text-[12px] font-500 text-ink-dim">Total</div>
+          <div className="mt-2 text-[22px] font-600 tnum text-ink sm:text-[24px]">{passwords.length}</div>
+        </Panel>
+        <Panel className="p-4">
+          <div className="text-[12px] font-500 text-ink-dim">Avg strength</div>
+          <div className="mt-2 text-[22px] font-600 tnum sm:text-[24px]" style={{ color: avgStrength > 70 ? '#4fd9a4' : avgStrength > 45 ? '#e0a850' : '#ff5c72' }}>{avgStrength}%</div>
+        </Panel>
+        <Panel className="p-4">
+          <div className="text-[12px] font-500 text-ink-dim">Weak</div>
+          <div className="mt-2 text-[22px] font-600 tnum text-down sm:text-[24px]">{passwords.filter((p) => strength(p.password).score < 3).length}</div>
+        </Panel>
       </div>
 
       <Panel>
         <SectionHead label="Credentials" count={String(filtered.length)} />
         <div className="divide-y divide-line-soft">
-          {filtered.length === 0 ? <Empty>No credentials match your search.</Empty> : filtered.map((p) => <Row key={p.id} p={p} onDelete={() => deletePassword(p.id)} />)}
+          {filtered.length === 0
+            ? <Empty>No credentials match your search.</Empty>
+            : filtered.map((p) => <Row key={p.id} p={p} onDelete={() => deletePassword(p.id)} />)
+          }
         </div>
       </Panel>
     </div>

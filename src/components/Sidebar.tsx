@@ -1,6 +1,7 @@
 import { LayoutGrid, KeyRound, StickyNote, Wallet, Landmark, CalendarDays, ListChecks, LogOut } from 'lucide-react'
 import { useVault } from '../store/VaultStore'
 import { isUpcoming } from '../lib/format'
+import { getUser } from '../lib/auth'
 import { HakoMark } from './Logo'
 
 export type PageKey = 'dashboard' | 'passwords' | 'notes' | 'income' | 'accounts' | 'calendar' | 'tasks'
@@ -17,6 +18,9 @@ const nav: { key: PageKey; label: string; icon: typeof LayoutGrid }[] = [
 
 export default function Sidebar({ page, setPage, onLogout }: { page: PageKey; setPage: (p: PageKey) => void; onLogout?: () => void }) {
   const { passwords, notes, income, accounts, tasks, events } = useVault()
+  const user = getUser()
+  const displayName = user?.username ?? 'HakoOS User'
+  const initials = displayName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
 
   const counts: Record<PageKey, number> = {
     dashboard: 0,
@@ -34,7 +38,7 @@ export default function Sidebar({ page, setPage, onLogout }: { page: PageKey; se
         <HakoMark size={36} />
         <div className="leading-tight">
           <div className="text-[15px] font-600 tracking-[-0.02em] text-ink">Hako<span className="hako-os font-700">OS</span></div>
-          <div className="text-[11px] text-ink-faint">Your Everything. In one box.</div>
+          <div className="text-[11px] text-ink-faint">Your life. In one box.</div>
         </div>
       </div>
 
@@ -68,10 +72,10 @@ export default function Sidebar({ page, setPage, onLogout }: { page: PageKey; se
       <div className="p-3">
         <div className="flex items-center gap-2.5 rounded-xl bg-panel-2/60 p-2.5">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-signal text-[13px] font-600 text-signal-ink">
-            MM
+            {initials}
           </div>
           <div className="min-w-0 flex-1 leading-tight">
-            <div className="text-[13px] font-500 text-ink">Mer Materiano</div>
+            <div className="truncate text-[13px] font-500 text-ink">{displayName}</div>
             <div className="flex items-center gap-1 text-[11px] text-up">
               <span className="h-1.5 w-1.5 rounded-full bg-up" /> Encrypted
             </div>

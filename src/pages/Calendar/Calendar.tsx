@@ -55,14 +55,17 @@ export default function Calendar() {
         </div>
 
         <div className="grid grid-cols-7 border-b border-line-soft">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-            <div key={d} className="px-2 py-2 text-center text-[9px] uppercase tracking-widest text-ink-faint">{d}</div>
+          {[['Sun','S'],['Mon','M'],['Tue','T'],['Wed','W'],['Thu','T'],['Fri','F'],['Sat','S']].map(([long, short]) => (
+            <div key={long} className="px-1 py-2 text-center text-[9px] uppercase tracking-widest text-ink-faint">
+              <span className="hidden sm:inline">{long}</span>
+              <span className="sm:hidden">{short}</span>
+            </div>
           ))}
         </div>
 
         <div className="grid grid-cols-7">
           {cells.map((day, i) => {
-            if (!day) return <div key={i} className="min-h-[84px] border-b border-r border-line-soft bg-panel-2/20" />
+            if (!day) return <div key={i} className="min-h-[52px] border-b border-r border-line-soft bg-panel-2/20 sm:min-h-[84px]" />
             const evs = eventsFor(day)
             const dayTasks = tasksFor(day)
             const items = [
@@ -75,12 +78,12 @@ export default function Calendar() {
               <button
                 key={day}
                 onClick={() => setSelected(day)}
-                className={`min-h-[84px] border-b border-r border-line-soft p-1.5 text-left transition-colors hover:bg-panel-2/60 ${isSel ? 'bg-panel-2' : ''}`}
+                className={`min-h-[52px] border-b border-r border-line-soft p-1 text-left transition-colors hover:bg-panel-2/60 sm:min-h-[84px] sm:p-1.5 ${isSel ? 'bg-panel-2' : ''}`}
               >
-                <span className={`inline-flex h-6 w-6 items-center justify-center rounded text-[11px] tnum ${isToday ? 'bg-signal text-signal-ink font-600' : isSel ? 'text-ink' : 'text-ink-dim'}`}>
+                <span className={`inline-flex h-5 w-5 items-center justify-center rounded text-[10px] tnum sm:h-6 sm:w-6 sm:text-[11px] ${isToday ? 'bg-signal text-signal-ink font-600' : isSel ? 'text-ink' : 'text-ink-dim'}`}>
                   {Number(day.slice(-2))}
                 </span>
-                <div className="mt-1 space-y-1">
+                <div className="mt-0.5 hidden space-y-0.5 sm:mt-1 sm:block sm:space-y-1">
                   {items.slice(0, 2).map((it) => (
                     <div key={it.id} className={`flex items-center gap-1 truncate rounded px-1 py-0.5 text-[9.5px] ${it.done ? 'opacity-50' : ''}`} style={{ backgroundColor: `color-mix(in srgb, ${it.color} 15%, transparent)`, color: it.color }}>
                       {it.kind === 'task' ? <ListChecks size={9} className="shrink-0" /> : <Dot size={12} className="-ml-1 shrink-0" />}
@@ -89,6 +92,13 @@ export default function Calendar() {
                   ))}
                   {items.length > 2 && <div className="px-1 text-[9px] text-ink-faint">+{items.length - 2} more</div>}
                 </div>
+                {items.length > 0 && (
+                  <div className="mt-0.5 flex gap-0.5 sm:hidden">
+                    {items.slice(0, 3).map((it) => (
+                      <span key={it.id} className="h-1 w-1 rounded-full shrink-0" style={{ backgroundColor: it.color }} />
+                    ))}
+                  </div>
+                )}
               </button>
             )
           })}
