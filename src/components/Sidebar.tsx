@@ -38,7 +38,7 @@ export default function Sidebar({ page, setPage, onLogout }: { page: PageKey; se
         <HakoMark size={36} />
         <div className="leading-tight">
           <div className="text-[15px] font-600 tracking-[-0.02em] text-ink">Hako<span className="hako-os font-700">OS</span></div>
-          <div className="text-[11px] text-ink-faint">Your life. In one box.</div>
+          <div className="text-[11px] text-ink-faint">Your Everything. In one box.</div>
         </div>
       </div>
 
@@ -49,17 +49,15 @@ export default function Sidebar({ page, setPage, onLogout }: { page: PageKey; se
             <button
               key={key}
               onClick={() => setPage(key)}
-              className={`group flex items-center gap-3 rounded-[10px] px-3 py-2 text-left transition-all duration-150 ${
-                active ? 'bg-signal text-signal-ink shadow-[0_1px_2px_rgba(0,0,0,0.3)]' : 'text-ink-dim hover:bg-panel-2/70 hover:text-ink'
-              }`}
+              className={`group flex items-center gap-3 rounded-[10px] px-3 py-2 text-left transition-all duration-150 ${active ? 'bg-signal text-signal-ink shadow-[0_1px_2px_rgba(0,0,0,0.3)]' : 'text-ink-dim hover:bg-panel-2/70 hover:text-ink'
+                }`}
             >
               <Icon size={17} strokeWidth={2} className={active ? 'text-signal-ink' : 'text-ink-dim group-hover:text-ink'} />
               <span className="flex-1 text-[14px] font-500 tracking-[-0.01em]">{label}</span>
               {key !== 'dashboard' && counts[key] > 0 && (
                 <span
-                  className={`rounded-full px-1.5 text-[11px] tnum ${
-                    active ? 'bg-white/25 text-signal-ink' : 'text-ink-faint group-hover:text-ink-dim'
-                  }`}
+                  className={`rounded-full px-1.5 text-[11px] tnum ${active ? 'bg-white/25 text-signal-ink' : 'text-ink-faint group-hover:text-ink-dim'
+                    }`}
                 >
                   {counts[key]}
                 </span>
