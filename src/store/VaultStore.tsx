@@ -5,6 +5,9 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { initDatabase } from '../db/database'
+import { Note } from '@/db/interfaces/notes.interface';
+import { dbAddNote, dbDeleteNote, dbTogglePin, dbUpdateNote, getAllNotes } from '@/db/repositories/notes.repository';
 
 // ---- Types -----------------------------------------------------------------
 
@@ -16,15 +19,6 @@ export type Password = {
   url: string
   category: 'Personal' | 'Work' | 'Finance' | 'Social' | 'Dev'
   updated: string // ISO date
-}
-
-export type Note = {
-  id: string
-  title: string
-  body: string
-  tag: 'Idea' | 'Meeting' | 'Personal' | 'Reference'
-  pinned: boolean
-  updated: string
 }
 
 export type IncomeEntry = {
@@ -208,6 +202,20 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     }
   }, [state])
 
+  // Hydrate notes from SQLite if running in Tauri environment
+  useEffect(() => {
+    initDatabase()
+      .then(() => getAllNotes())
+      .then((sqliteNotes) => {
+        if (sqliteNotes && sqliteNotes.length > 0) {
+          setState((s) => ({ ...s, notes: sqliteNotes }))
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load notes from SQLite:', err)
+      })
+  }, [])
+
   const api: VaultContextType = {
     ...state,
     addPassword: (p) =>
@@ -215,17 +223,38 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     deletePassword: (id) => setState((s) => ({ ...s, passwords: s.passwords.filter((x) => x.id !== id) })),
     addNote: (n) => {
       const id = uid()
-      setState((s) => ({ ...s, notes: [{ ...n, id, pinned: false, updated: iso(new Date()) }, ...s.notes] }))
+      const updated = iso(new Date())
+      const newNote: Note = { ...n, id, pinned: false, updated }
+      setState((s) => ({ ...s, notes: [newNote, ...s.notes] }))
+      dbAddNote(newNote).catch(console.error)
       return id
     },
-    updateNote: (id, patch) =>
+    updateNote: (id, patch) => {
+      const updated = iso(new Date())
       setState((s) => ({
         ...s,
-        notes: s.notes.map((x) => (x.id === id ? { ...x, ...patch, updated: iso(new Date()) } : x)),
-      })),
-    togglePin: (id) =>
-      setState((s) => ({ ...s, notes: s.notes.map((x) => (x.id === id ? { ...x, pinned: !x.pinned } : x)) })),
-    deleteNote: (id) => setState((s) => ({ ...s, notes: s.notes.filter((x) => x.id !== id) })),
+        notes: s.notes.map((x) => (x.id === id ? { ...x, ...patch, updated } : x)),
+      }))
+      dbUpdateNote(id, { ...patch, updated }).catch(console.error)
+    },
+    togglePin: (id) => {
+      let nextPinned = false
+      setState((s) => {
+        const note = s.notes.find((x) => x.id === id)
+        if (note) {
+          nextPinned = !note.pinned
+        }
+        return {
+          ...s,
+          notes: s.notes.map((x) => (x.id === id ? { ...x, pinned: !x.pinned } : x)),
+        }
+      })
+      dbTogglePin(id, nextPinned).catch(console.error)
+    },
+    deleteNote: (id) => {
+      setState((s) => ({ ...s, notes: s.notes.filter((x) => x.id !== id) }))
+      dbDeleteNote(id).catch(console.error)
+    },
     addIncome: (e) => setState((s) => ({ ...s, income: [{ ...e, id: uid() }, ...s.income] })),
     deleteIncome: (id) => setState((s) => ({ ...s, income: s.income.filter((x) => x.id !== id) })),
     addExpense: (e) => setState((s) => ({ ...s, expenses: [{ ...e, id: uid() }, ...s.expenses] })),
