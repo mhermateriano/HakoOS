@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Pin, Trash2, Plus, Search, ChevronLeft, FileText } from 'lucide-react'
-import { useVault, type Note } from '../../store/VaultStore'
+import { useVault } from '../../store/VaultStore'
 import { fmtDateFull } from '../../lib/format'
 import { catColor } from '../../lib/colors'
 import { Button, Select, Tag, Empty } from '../../components/ui'
+import { Note } from '@/db/interfaces/notes.interface';
 
 const tags: Note['tag'][] = ['Idea', 'Meeting', 'Personal', 'Reference']
 
